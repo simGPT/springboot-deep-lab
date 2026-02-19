@@ -1,6 +1,14 @@
 # springboot-deep-lab
 백엔드 핵심 기술과 아키텍처를 깊이 있게 탐구하고 클라우드 환경에서의 배포, 동시성 제어, 성능 테스트 등을 학습하는 Spring Boot 기반 엔지니어링 레포지토리
 
+## Tech
+- **Framework**: Spring Boot
+- **Database**: postgreSQL + Redis (캐시/인증용)
+- **Cloud**: Azure VM (서버), Azure Database for PostgreSQL
+- **DevOps**: Docker,  GitHub Actions, Kubernetes
+- **LoadBalancer**
+- **Auto scaling**
+
 ## **🎯 Git Convention**
 
 - 🎉 **Start:** Start New Project [:tada:]
