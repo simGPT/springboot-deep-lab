@@ -7,6 +7,10 @@
 - **Cloud**: Azure VM (Auto scaling), Azure Database for PostgreSQL, LoadBalancer
 - **DevOps**: Docker,  GitHub Actions, Kubernetes
 
+## ERD
+<img width="1462" height="679" alt="image" src="https://github.com/user-attachments/assets/e9bde81c-254e-4357-8306-b07eb7835820" />
+
+
 
 ## **🎯 Git Convention**
 
