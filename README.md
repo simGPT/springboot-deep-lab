@@ -4,10 +4,9 @@
 ## Tech
 - **Framework**: Spring Boot
 - **Database**: postgreSQL + Redis (캐시/인증용)
-- **Cloud**: Azure VM (서버), Azure Database for PostgreSQL
+- **Cloud**: Azure VM (Auto scaling), Azure Database for PostgreSQL, LoadBalancer
 - **DevOps**: Docker,  GitHub Actions, Kubernetes
-- **LoadBalancer**
-- **Auto scaling**
+
 
 ## **🎯 Git Convention**
 
