@@ -1,0 +1,53 @@
+services:
+  app:
+    build: .  # 현재 폴더의 Dockerfile을 읽어서 빌드함
+    image: deep-lab:1.0
+    container_name: deep-lab-container
+    restart: always
+
+    ports:
+      - "8080:8080" # host의 8080 포트를 컨테이너의 8080 포트와 매핑 -> 포트 포워딩!
+
+    environment:
+      SPRING_PROFILES_ACTIVE: dev # application-dev.yml 이용
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/postgres
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234
+      TZ: Asia/Seoul
+
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+
+    networks:
+      - deep-lab-network # postgreSQL 과 같은 네트워크 공유
+
+  postgres-db:
+    image: postgres:15 # lastest 하면 업데이트 되기도 해서 안좋음
+    container_name: postgres-db
+    restart: always
+
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      TZ: Asia/Seoul
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - deep-lab-network
+
+networks:
+  deep-lab-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
