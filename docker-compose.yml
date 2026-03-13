@@ -1,7 +1,7 @@
 services:
   app:
-    build: .  # 현재 폴더의 Dockerfile을 읽어서 빌드함
-    image: deep-lab:1.0
+    #build: .  # 현재 폴더의 Dockerfile을 읽어서 빌드하는 건데 -> 이것보다는 GitHub Actions 에서 빌드가 더 빨라서 그렇게 변경
+    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:latest
     container_name: deep-lab-container
     restart: always
 
@@ -34,7 +34,7 @@ services:
       TZ: Asia/Seoul
 
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data # DB 볼륨
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -43,7 +43,7 @@ services:
       retries: 5
 
     networks:
-      - deep-lab-network
+      - deep-lab-network # 네트워크 지정
 
 networks:
   deep-lab-network:
