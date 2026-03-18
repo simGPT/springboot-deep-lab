@@ -1,0 +1,53 @@
+services:
+  app:
+    #build: .  # 현재 폴더의 Dockerfile을 읽어서 빌드하는 건데 -> 이것보다는 GitHub Actions 에서 빌드가 더 빨라서 그렇게 변경
+    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:latest  # 컨테이너 생성 시에 사용할 이미지 지정
+    container_name: deep-lab-container
+    restart: always
+
+    ports:
+      - "8080:8080" # host의 8080 포트를 컨테이너의 8080 포트와 매핑 -> 포트 포워딩!
+
+    environment:
+      SPRING_PROFILES_ACTIVE: dev # application-dev.yml 이용
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASS}
+      TZ: Asia/Seoul
+
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+
+    networks:
+      - deep-lab-network # postgreSQL 과 같은 네트워크 공유
+
+  postgres-db:
+    image: postgres:15 # lastest 하면 업데이트 되기도 해서 안좋음
+    container_name: postgres-db
+    restart: always
+
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      TZ: Asia/Seoul
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data # DB 볼륨
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - deep-lab-network # 네트워크 지정
+
+networks:
+  deep-lab-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
