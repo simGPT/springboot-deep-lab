@@ -55,7 +55,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: recursive # true
+          submodules: true
           token: ${{ secrets.GIT_ACTIONS_PAT }}
 
       # 2. JDK 21 설정
