@@ -61,6 +61,7 @@ jobs:
   deploy: # 배포
     runs-on: self-hosted
     needs: build
+    environment: ENV_DEV
 
     steps:
 
