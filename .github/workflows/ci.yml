@@ -24,6 +24,7 @@ jobs:
         with:
           token: ${{ secrets.GIT_ACTIONS_PAT }} # 서브모듈 접근
           submodules: recursive
+          persist-credentials: false
           fetch-depth: 0
 
       # 2. JDK 21 설정
