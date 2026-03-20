@@ -8,7 +8,7 @@ on:
 jobs:
 
   build:  # 빌드
-    runs-on: self-hosted
+    runs-on: ubuntu-latest # github 서버 사용
     environment: ENV_DEV
 
     steps:
@@ -59,29 +59,70 @@ jobs:
           cache-to: type=gha,mode=max
 
   deploy: # 배포
-    runs-on: self-hosted
+    runs-on: ubuntu-latest # github 서버 사용
     needs: build
     environment: ENV_DEV
 
     steps:
+      - name: Deploy to Server via SSH # 서버에 SSH로 접속
+        uses: appleboy/ssh-action@v1.0.3 # 원격 접속 도구(라이브러리) 사용
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ubuntu
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            mkdir -p $HOME/springboot-deep-lab
+            cd $HOME/springboot-deep-lab
+            
+            echo "${{ secrets.ENV_DEV }}" > .env
+            
+            cat <<EOF > docker-compose.yml
+            services:
+              app:
+                image: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
+                container_name: deep-lab-container
+                restart: always
+                ports:
+                  - "8080:8080"
+                environment:
+                  SPRING_PROFILES_ACTIVE: dev
+                  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/\${DB_NAME}
+                  SPRING_DATASOURCE_USERNAME: \${DB_USER}
+                  SPRING_DATASOURCE_PASSWORD: \${DB_PASS}
+                  TZ: Asia/Seoul
+                depends_on:
+                  postgres-db:
+                    condition: service_healthy
+                networks:
+                  - deep-lab-network
 
-      - name: Checkout repository
-        uses: actions/checkout@v4
+              postgres-db:
+                image: postgres:15
+                container_name: postgres-db
+                restart: always
+                environment:
+                  POSTGRES_DB: \${DB_NAME}
+                  POSTGRES_USER: \${DB_USER}
+                  POSTGRES_PASSWORD: \${DB_PASS}
+                  TZ: Asia/Seoul
+                volumes:
+                  - postgres-data:/var/lib/postgresql/data
+                healthcheck:
+                  test: ["CMD-SHELL", "pg_isready -U postgres"]
+                  interval: 5s
+                  timeout: 5s
+                  retries: 5
+                networks:
+                  - deep-lab-network
 
-      # .env 생성
-      - name: Create .env file
-        run: echo "${{ secrets.ENV_DEV }}" > .env
+            networks:
+              deep-lab-network:
+                driver: bridge
 
-      # 배포할 서버의 프로젝트용 디렉토리 설정
-      - name: Setup deployment directory
-        run: |
-          mkdir -p $HOME/springboot-deep-lab
-          cp docker-compose.yml $HOME/springboot-deep-lab/
-          cp .env $HOME/springboot-deep-lab/
+            volumes:
+              postgres-data:
+           EOF
 
-      # Docker 배포
-      - name: Deploy with Docker
-        run: |
-          cd $HOME/springboot-deep-lab
-          docker compose pull
-          docker compose up -d
+            docker compose pull
+            docker compose up -d
+            docker image prune -f
