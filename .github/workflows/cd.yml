@@ -9,6 +9,7 @@ jobs:
 
   build:  # 빌드
     runs-on: self-hosted
+    environment: ENV_DEV
 
     steps:
       # 1. 코드 체크아웃
